@@ -1,0 +1,194 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdbool.h>
+
+// Definição da estrutura da carta
+typedef struct {
+    char pais[50];
+    char codigo[10];
+    int populacao;
+    float area;
+    float pib;
+    int pontos_turisticos;
+    float densidade;
+} Carta;
+
+// Função para calcular a densidade demográfica
+void calcular_densidade(Carta *carta) {
+    carta->densidade = (carta->area > 0) ? carta->populacao / carta->area : 0;
+}
+
+// Função para exibir os dados de uma carta
+void exibir_carta(Carta carta) {
+    printf("\n=== DADOS DA CARTA ===\n");
+    printf("País: %s\n", carta.pais);
+    printf("Código: %s\n", carta.codigo);
+    printf("População: %d habitantes\n", carta.populacao);
+    printf("Área: %.2f km²\n", carta.area);
+    printf("PIB: %.2f milhões de USD\n", carta.pib);
+    printf("Pontos turísticos: %d\n", carta.pontos_turisticos);
+    printf("Densidade demográfica: %.2f hab/km²\n", carta.densidade);
+}
+
+// Função para exibir o menu de atributos
+int exibir_menu_atributos(bool primeiro_atributo, int atributo_excluido) {
+    int escolha;
+    
+    printf("\n=== MENU DE ATRIBUTOS ===\n");
+    printf("Escolha %s atributo para comparar:\n", primeiro_atributo ? "o primeiro" : "o segundo");
+    printf("1. População\n");
+    printf("2. Área\n");
+    printf("3. PIB\n");
+    printf("4. Pontos turísticos\n");
+    printf("5. Densidade demográfica\n");
+    
+    if (!primeiro_atributo) {
+        printf("(Atributo %d já foi selecionado)\n", atributo_excluido);
+    }
+    
+    printf("Digite sua escolha (1-5): ");
+    scanf("%d", &escolha);
+    
+    return escolha;
+}
+
+// Função para obter o valor de um atributo específico
+float obter_valor_atributo(Carta carta, int atributo) {
+    switch(atributo) {
+        case 1: return (float)carta.populacao;
+        case 2: return carta.area;
+        case 3: return carta.pib;
+        case 4: return (float)carta.pontos_turisticos;
+        case 5: return carta.densidade;
+        default: return 0;
+    }
+}
+
+// Função para obter o nome do atributo
+const char* obter_nome_atributo(int atributo) {
+    switch(atributo) {
+        case 1: return "População";
+        case 2: return "Área";
+        case 3: return "PIB";
+        case 4: return "Pontos turísticos";
+        case 5: return "Densidade demográfica";
+        default: return "Desconhecido";
+    }
+}
+
+// Função para comparar dois valores de um atributo
+int comparar_atributo(float valor1, float valor2, int atributo) {
+    // Densidade tem regra invertida (menor valor vence)
+    if (atributo == 5) {
+        return (valor1 < valor2) ? 1 : (valor1 > valor2) ? -1 : 0;
+    }
+    // Demais atributos: maior valor vence
+    return (valor1 > valor2) ? 1 : (valor1 < valor2) ? -1 : 0;
+}
+
+// Função principal de comparação
+void comparar_cartas(Carta c1, Carta c2, int atributo1, int atributo2) {
+    float c1_atr1 = obter_valor_atributo(c1, atributo1);
+    float c2_atr1 = obter_valor_atributo(c2, atributo1);
+    float c1_atr2 = obter_valor_atributo(c1, atributo2);
+    float c2_atr2 = obter_valor_atributo(c2, atributo2);
+    
+    int resultado_atr1 = comparar_atributo(c1_atr1, c2_atr1, atributo1);
+    int resultado_atr2 = comparar_atributo(c1_atr2, c2_atr2, atributo2);
+    
+    float soma_c1 = c1_atr1 + c1_atr2;
+    float soma_c2 = c2_atr1 + c2_atr2;
+    
+    // Exibição dos resultados
+    printf("\n=== RESULTADO DA COMPARAÇÃO ===\n");
+    printf("País 1: %s\n", c1.pais);
+    printf("País 2: %s\n\n", c2.pais);
+    
+    printf("Atributo 1: %s\n", obter_nome_atributo(atributo1));
+    printf("%s: %.2f\n", c1.pais, c1_atr1);
+    printf("%s: %.2f\n", c2.pais, c2_atr1);
+    printf("Vencedor do 1º atributo: %s\n\n", 
+           resultado_atr1 == 1 ? c1.pais : 
+           resultado_atr1 == -1 ? c2.pais : "Empate");
+    
+    printf("Atributo 2: %s\n", obter_nome_atributo(atributo2));
+    printf("%s: %.2f\n", c1.pais, c1_atr2);
+    printf("%s: %.2f\n", c2.pais, c2_atr2);
+    printf("Vencedor do 2º atributo: %s\n\n", 
+           resultado_atr2 == 1 ? c1.pais : 
+           resultado_atr2 == -1 ? c2.pais : "Empate");
+    
+    printf("Soma dos atributos:\n");
+    printf("%s: %.2f\n", c1.pais, soma_c1);
+    printf("%s: %.2f\n", c2.pais, soma_c2);
+    
+    if (soma_c1 > soma_c2) {
+        printf("\nRESULTADO FINAL: %s venceu!\n", c1.pais);
+    } else if (soma_c2 > soma_c1) {
+        printf("\nRESULTADO FINAL: %s venceu!\n", c2.pais);
+    } else {
+        printf("\nRESULTADO FINAL: Empate!\n");
+    }
+}
+
+int main() {
+    // Criando duas cartas de exemplo
+    Carta carta1 = {
+        .pais = "Brasil",
+        .codigo = "BR001",
+        .populacao = 213000000,
+        .area = 8515767.049,
+        .pib = 1847000.00,
+        .pontos_turisticos = 25
+    };
+    
+    Carta carta2 = {
+        .pais = "Argentina",
+        .codigo = "AR001",
+        .populacao = 45380000,
+        .area = 2780400.00,
+        .pib = 445500.00,
+        .pontos_turisticos = 18
+    };
+    
+    // Calculando densidade para ambas as cartas
+    calcular_densidade(&carta1);
+    calcular_densidade(&carta2);
+    
+    // Exibindo informações das cartas
+    printf("=== SUPER TRUNFO - COMPARAÇÃO AVANÇADA ===\n");
+    exibir_carta(carta1);
+    exibir_carta(carta2);
+    
+    // Seleção dos atributos
+    int atributo1, atributo2;
+    bool atributo_valido;
+    
+    do {
+        atributo1 = exibir_menu_atributos(true, 0);
+        atributo_valido = (atributo1 >= 1 && atributo1 <= 5);
+        
+        if (!atributo_valido) {
+            printf("Opção inválida! Digite um número entre 1 e 5.\n");
+        }
+    } while (!atributo_valido);
+    
+    do {
+        atributo2 = exibir_menu_atributos(false, atributo1);
+        atributo_valido = (atributo2 >= 1 && atributo2 <= 5) && (atributo2 != atributo1);
+        
+        if (!atributo_valido) {
+            if (atributo2 == atributo1) {
+                printf("Você já selecionou este atributo! Escolha outro.\n");
+            } else {
+                printf("Opção inválida! Digite um número entre 1 e 5.\n");
+            }
+        }
+    } while (!atributo_valido);
+    
+    // Realizando a comparação
+    comparar_cartas(carta1, carta2, atributo1, atributo2);
+    
+    return 0;
+}
